@@ -54,7 +54,7 @@ button {
     font-size: 70px;
 }
 
-.btn {
+.all-btn {
     height: 60%;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -62,13 +62,13 @@ button {
     row-gap: 15px;
 }
 
-.operation {
+.operation, .equal {
     color: white;
     font-size: 55px;
     background-color: orange;
 }
 
-.all-clear, .sign, .percent {
+.all-clear, .paren {
     color: black;
     font-size: 35px;
     background-color: #adadad;
