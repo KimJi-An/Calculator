@@ -6,24 +6,22 @@ const allClear = document.querySelector(".all-clear");       // 초기화
 const paren = document.querySelectorAll(".paren");           // 괄호
 const equal = document.querySelector(".equal");              // 등호
 
-// 연산자 우선순위
-const rank = new Map([
-    ['*', 1],
-    ['/', 1],
-    ['+', 2],
-    ['-', 2],
-    ['(', 3]
-]);
-
 let displayFormula = "";
 let displayResult = "";
 
-let infix = [];
+/* 연산자 우선순위 */
+function rank(op) {
+    if(op == '*' || op == '/') return 1;
+    else if(op == '+' || op == '-') return 2;
+    else return 3;
+}
 
 /* 후위표기법으로 변경 */
 function infixToPostfix() {
-    const str = displayFormula.trim().split(/ +/);
+    const str = ("( " + displayFormula + " )").trim().split(/ +/);
+    
     let stack = []; 
+    let infix = [];
 
     for(token of str) {
         switch(token) {
@@ -40,35 +38,87 @@ function infixToPostfix() {
                 break;
             case '×':
                 token = '*';
+                if(rank(stack[stack.length - 1]) <= rank(token)) 
+                    infix.push(stack.pop());                
+                stack.push(token);
+                break;
             case '÷':
                 token = '/';
+                if(rank(stack[stack.length - 1]) <= rank(token)) 
+                    infix.push(stack.pop());
+                stack.push(token);
+                break;
             case '+':
-            case '-':
-                if(rank.get(stack[stack.length - 1]) > rank.get(token)) {
-                    stack.push(token);
-                }
-                else {
-                    infix.push(token);
-                }
+                if(rank(stack[stack.length - 1]) <= rank(token)) 
+                    infix.push(stack.pop());
+                stack.push(token);
+                break;
+            case '−':
+                token = '-';
+                if(rank(stack[stack.length - 1]) <= rank(token)) 
+                    infix.push(stack.pop());
+                stack.push(token);
                 break;
             default:
                 infix.push(token);
         }
     }
-    console.log(infix);
+
+    return infix;
+}
+
+/* 문자열을 정수 또는 실수로 변환 */
+function stringToNum(str) {
+    if(str.includes('.')) return parseFloat(str);
+    else return parseInt(str); 
+}
+
+/* 후위표기법 계산 */
+function calculation(infix) {
+    let stack = [];
+    let num1, num2;
+
+    for(token of infix) {
+        switch(token) {
+            case '*':
+                num2 = stack.pop();
+                num1 = stack.pop();
+                stack.push(num1 * num2);
+                break;
+            case '/':
+                num2 = stack.pop();
+                num1 = stack.pop();
+                stack.push(num1 / num2);
+                break;
+            case '+':
+                num2 = stack.pop();
+                num1 = stack.pop();
+                stack.push(num1 + num2);
+                break;
+            case '-':
+                num2 = stack.pop();
+                num1 = stack.pop();
+                stack.push(num1 - num2);
+                break;
+            default:
+                stack.push(stringToNum(token));
+        }
+    }
+
+    return Math.round(stack.pop() * 100) / 100;
 }
 
 /* 등호 클릭 */
 function onEqualClick() {
-    infixToPostfix();
-    
+    const infix = infixToPostfix();
+    displayResult = calculation(infix);
+    result.innerText = displayResult;
 }
 
 /* AC 클릭 */
 function onAllClearClick() {
     displayFormula = "";
     displayResult = "";
-    infix= "";
     formula.innerText = "0";
     result.innerText = "0";
 }
